@@ -7,9 +7,12 @@ from driving_swarm_utils.node import DrivingSwarmNode, main_fn
 
 class VelocityController(DrivingSwarmNode):
 
+    # use with use_rviz:=false
+
     def __init__(self, name: str) -> None:
         super().__init__(name)
-        
+
+        self.started = True
         self.publisher = self.create_publisher(Twist, 'cmd_vel', 10)
         self.forward_distance = 0
         self.create_subscription(LaserScan, 'scan', self.laser_cb, rclpy.qos.qos_profile_sensor_data)
@@ -17,13 +20,12 @@ class VelocityController(DrivingSwarmNode):
         self.setup_command_interface()
         
     def timer_cb(self):
-        if not self.started:
-            return
         msg = Twist()
-        x = self.forward_distance - 0.3
-        x = x if x < 0.1 else 0.1
-        x = x if x >= 0 else 0.0
-        msg.linear.x = x
+        # x = self.forward_distance - 0.3
+        # x = x if x < 0.1 else 0.1
+        # x = x if x >= 0 else 0.0
+        # msg.linear.x = x
+        msg.linear.x = -1.0
         self.publisher.publish(msg)
     
     def laser_cb(self, msg):
