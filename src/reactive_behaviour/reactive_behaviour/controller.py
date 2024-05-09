@@ -9,7 +9,10 @@ import random
 
 class VelocityController(DrivingSwarmNode):
 
-    # use with ros2 launch reactive_behaviour robot.launch.py use_rviz:=false
+    # ros2 launch reactive_behaviour robot.launch.py use_rviz:=false
+    # score: 33.64 at t=240.0s
+    # ros2 launch reactive_behaviour swarmlab.launch.py use_rviz:=false
+    # score: 25.94 at t=240.0s
 
     def __init__(self, name: str) -> None:
         super().__init__(name)
