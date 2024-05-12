@@ -1,5 +1,6 @@
 import rclpy
 import numpy as np
+from scipy.optimize import minimize
 from rclpy.node import Node
 
 from driving_swarm_messages.msg import Range
@@ -16,6 +17,7 @@ class LocatorNode(Node):
         self.initialized = False
         self.create_timer(1.0, self.timer_cb)
         self.get_logger().info('locator node started')
+        self.last_position=[0.0, 0.0, 0.0]
         
     def range_cb(self, msg):
         self.anchor_ranges.append(msg)
@@ -35,10 +37,19 @@ class LocatorNode(Node):
     def calculate_position(self):
         if not len(self.anchor_ranges):
             return 0.0, 0.0, 0.0
-        
-        # YOUR CODE GOES HERE:
-        x = np.mean([r.range for r in self.anchor_ranges]) - 0.5
-        return x, 0.0, 0.0
+
+        position=minimize(self.calculate_msqerror,self.last_position,    options={
+        'ftol':1e-10,         # Tolerance
+        'maxiter': 1000      # Maximum iterations
+        }).x
+        self.get_logger().info("estimated Position: "+str(position))
+        self.last_position=position
+        return position[0],position[1],position[2]
+    #driving_swarm_messages.msg.Range(range=1.5280119180679321, anchor=geometry_msgs.msg.Point(x=1.0, y=1.0, z=1.0))
+    def calculate_msqerror(self,guess):
+        return np.mean([np.square(r.range-self.distance(guess,r.anchor)) for r in self.anchor_ranges])
+    def distance(self,guess,anchor):
+        return np.sqrt(np.square(guess[0]-anchor.x)+np.square(guess[1]-anchor.y)+np.square(guess[2]-anchor.z))
 
 
 def main(args=None):
